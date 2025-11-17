@@ -1,69 +1,63 @@
-import { useState } from 'react'
+import { type FormEvent, useState } from 'react'
 import './App.css'
 
+interface ResultadoProps{
+  nome: string;
+  idade: number;
+}
+
 function App() {
-  const [dataNascimento, setDataNascimento] = useState('');
-  const [nomeCompleto, setNomeCompleto] = useState('');
-  const [idade, setIdade] = useState<number | null>(null);
+  const [nome, setNome] = useState("")
+  const [ano, setAno] = useState("")
+  const [resultado, setResultado] = useState<ResultadoProps>()
 
-  const hoje = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+  function descobrirIdade(e: FormEvent){
+    e.preventDefault();
 
-  function calcular() {
-    const dataAtual = new Date();
-    dataAtual.setHours(0, 0, 0, 0);
+    const currentYear = new Date().getUTCFullYear();
+    setResultado({
+      nome: nome,
+      idade: currentYear - Number(ano)
+    });
 
-    if (!dataNascimento) {
-      alert('Informe uma data de nascimento válida.');
-      return;
-    }
+    setNome("")
+    setAno("")
 
-    const partesData = dataNascimento.split('-');
-    const anoNascimento = parseInt(partesData[0], 10);
-    const mesNascimento = parseInt(partesData[1], 10) - 1;
-    const diaNascimento = parseInt(partesData[2], 10);
-
-    const dataNasc = new Date(anoNascimento, mesNascimento, diaNascimento);
-    dataNasc.setHours(0, 0, 0, 0);
-
-    let idade = dataAtual.getFullYear() - dataNasc.getFullYear();
-    const mesAtual = dataAtual.getMonth();
-    const diaAtual = dataAtual.getDate();
-
-    if (mesAtual < mesNascimento || (mesAtual === mesNascimento && diaAtual < diaNascimento)) {
-      idade--;
-    }
-
-    setIdade(idade);
   }
 
   return (
-    <>
-      <div>
-        <main className='container'>
-          <h1>Calculadora de idade</h1>
-        </main>
+    <div className="container">
+      <h1>Descubra sua idade</h1>
 
-        <form className="form" onSubmit={(e) => { e.preventDefault(); calcular(); }}>
-          <label>Nome completo: </label>
-          <br />
-          <input className="input" type="text" placeholder='Maria' required value={nomeCompleto} onChange={ (e) => setNomeCompleto(e.target.value)} />
-          <br />
-          <label>Data de nascimento: </label>
-          <br />
-          <input className="input" type="date" placeholder='01/01/2000' min="1900-01-01" max={hoje} value={dataNascimento} required onChange={ (e) => setDataNascimento(e.target.value)} />
-          <br />
-          <input className="button" type="submit" value="Calcular idade" />
-        </form>
+      <form className="form" onSubmit={descobrirIdade}>
+        <label className="label">Digite seu nome?</label>
+        <input
+          className="input"
+          placeholder="Digite seu nome..."
+          value={nome}
+          onChange={ (e) => setNome(e.target.value) }
+        />
 
-        <div className="result">
-           <h2>Resultado:</h2>
-          <p>Nome: {nomeCompleto || '—'}</p>
-          <p>Idade: {idade !== null ? `${idade} anos` : '—'}</p>
-         </div>
-       
-      </div>
-     
-    </>
+        <label className="label">Digite o ano que nasceu?</label>
+        <input
+          className="input"
+          placeholder="Digite seu nome..."
+          value={ano}
+          onChange={ (e) => setAno(e.target.value) }
+        />
+
+        <button type="submit" onClick={descobrirIdade}>
+          Descobrir idade
+        </button>
+      </form>
+
+      {resultado && resultado.nome !== '' && (
+      <section className="result">
+        <h2>{resultado?.nome} você tem: <span>{resultado?.idade} anos</span> </h2>
+      </section>
+      )}
+
+    </div>
   )
 }
 
